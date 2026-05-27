@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vote — Fonctionnalités Agentiques RH</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      min-height: 100vh;
+      color: #fff;
+      padding: 40px 20px 80px;
+    }
+
+    .container { max-width: 740px; margin: 0 auto; }
+
+    /* Header */
+    header { text-align: center; margin-bottom: 48px; }
+
+    .badge {
+      display: inline-block;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #a5b4fc;
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    header p { color: rgba(255,255,255,0.5); font-size: 15px; }
+
+    /* Feature cards */
+    .feature-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 16px;
+      padding: 22px 24px;
+      margin-bottom: 14px;
+      transition: border-color 0.25s, background 0.25s;
+    }
+
+    .feature-card.voted {
+      border-color: rgba(99,102,241,0.45);
+      background: rgba(99,102,241,0.06);
+    }
+
+    .feature-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .feature-emoji { font-size: 28px; flex-shrink: 0; line-height: 1; }
+
+    .feature-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+
+    .feature-desc {
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.55;
+    }
+
+    /* Vote buttons */
+    .vote-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .vote-btn {
+      flex: 1;
+      min-width: 110px;
+      padding: 9px 12px;
+      border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.55);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.18s;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .vote-btn:hover {
+      background: rgba(255,255,255,0.09);
+      border-color: rgba(255,255,255,0.25);
+      color: #fff;
+    }
+
+    .vote-btn.selected.indispensable {
+      background: rgba(239,68,68,0.18);
+      border-color: #ef4444;
+      color: #fca5a5;
+    }
+
+    .vote-btn.selected.utile {
+      background: rgba(234,179,8,0.18);
+      border-color: #eab308;
+      color: #fde047;
+    }
+
+    .vote-btn.selected.pas_urgent {
+      background: rgba(99,102,241,0.18);
+      border-color: #6366f1;
+      color: #a5b4fc;
+    }
+
+    /* Submit */
+    .submit-wrap { text-align: center; margin-top: 36px; }
+
+    .submit-btn {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      border: none;
+      padding: 15px 52px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: not-allowed;
+      transition: all 0.2s;
+      opacity: 0.35;
+      letter-spacing: 0.3px;
+    }
+
+    .submit-btn.active {
+      opacity: 1;
+      cursor: pointer;
+      box-shadow: 0 4px 28px rgba(99,102,241,0.45);
+    }
+
+    .submit-btn.active:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 36px rgba(99,102,241,0.55);
+    }
+
+    .hint {
+      margin-top: 10px;
+      color: rgba(255,255,255,0.25);
+      font-size: 12px;
+    }
+
+    /* Success screen */
+    #success-screen { display: none; }
+
+    .success-header { text-align: center; margin-bottom: 40px; }
+
+    .checkmark {
+      font-size: 60px;
+      margin-bottom: 16px;
+      display: block;
+      animation: pop 0.5s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0); opacity: 0; }
+      70% { transform: scale(1.15); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .success-header h2 {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, #fff, #a5b4fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .success-header p { color: rgba(255,255,255,0.45); font-size: 14px; }
+
+    /* Result cards */
+    .result-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 14px;
+      padding: 18px 22px;
+      margin-bottom: 10px;
+    }
+
+    .result-feature-name {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 7px;
+      font-size: 12px;
+    }
+
+    .bar-label { width: 116px; flex-shrink: 0; color: rgba(255,255,255,0.5); }
+
+    .bar-track {
+      flex: 1;
+      height: 7px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      width: 0;
+      transition: width 0.9s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .bar-fill.indispensable { background: linear-gradient(90deg, #ef4444, #f87171); }
+    .bar-fill.utile        { background: linear-gradient(90deg, #eab308, #fde047); }
+    .bar-fill.pas_urgent   { background: linear-gradient(90deg, #6366f1, #a5b4fc); }
+
+    .bar-count { width: 20px; text-align: right; color: rgba(255,255,255,0.35); }
+
+    .voter-badge {
+      text-align: center;
+      margin-top: 28px;
+      color: rgba(255,255,255,0.3);
+      font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Loading */
+    #loading { text-align: center; padding: 80px; color: rgba(255,255,255,0.3); font-size: 14px; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div id="loading">Chargement…</div>
+
+  <!-- Voting screen -->
+  <div id="vote-screen" style="display:none">
+    <header>
+      <div class="badge">🤖 Agentique RH — 2026</div>
+      <h1>Quelle fonctionnalité prioriser ?</h1>
+      <p>Pour chaque agent, indiquez votre niveau de priorité</p>
+    </header>
+
+    <div id="features-list"></div>
+
+    <div class="submit-wrap">
+      <button id="submit-btn" class="submit-btn">Enregistrer mon vote</button>
+      <p class="hint" id="hint-text">Votez pour les 5 fonctionnalités pour activer le bouton</p>
+    </div>
+  </div>
+
+  <!-- Success screen -->
+  <div id="success-screen">
+    <div class="success-header">
+      <span class="checkmark">✅</span>
+      <h2>Vote enregistré !</h2>
+      <p>Merci pour votre contribution. Voici les résultats en temps réel.</p>
+    </div>
+    <div id="results-list"></div>
+    <p class="voter-badge" id="voter-count"></p>
+  </div>
+
+</div>
+
+<script>
+  let features = [];
+  let voteOptions = [];
+  const votes = {};
+
+  async function init() {
+    const data = await fetch('/api/state').then(r => r.json());
+    features = data.features;
+    voteOptions = data.voteOptions;
+
+    document.getElementById('loading').style.display = 'none';
+
+    if (data.hasVoted) {
+      showResults(data.results, data.voterCount);
+    } else {
+      buildVoteForm();
+      document.getElementById('vote-screen').style.display = 'block';
+    }
+  }
+
+  function buildVoteForm() {
+    const list = document.getElementById('features-list');
+    list.innerHTML = features.map(f => `
+      <div class="feature-card" id="card-${f.id}">
+        <div class="feature-header">
+          <div class="feature-emoji">${f.emoji}</div>
+          <div>
+            <div class="feature-name">${f.name}</div>
+            <div class="feature-desc">${f.description}</div>
+          </div>
+        </div>
+        <div class="vote-buttons">
+          ${voteOptions.map(opt => `
+            <button
+              class="vote-btn"
+              data-feature="${f.id}"
+              data-value="${opt.value}"
+              onclick="selectVote(${f.id}, '${opt.value}', this)"
+            >${opt.emoji} ${opt.label}</button>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function selectVote(featureId, value, btn) {
+    document.querySelectorAll(`[data-feature="${featureId}"]`).forEach(b => {
+      b.classList.remove('selected', 'indispensable', 'utile', 'pas_urgent');
+    });
+    btn.classList.add('selected', value);
+    document.getElementById(`card-${featureId}`).classList.add('voted');
+    votes[featureId] = value;
+
+    const remaining = features.filter(f => !votes[f.id]).length;
+    const btn2 = document.getElementById('submit-btn');
+    const hint = document.getElementById('hint-text');
+
+    if (remaining === 0) {
+      btn2.classList.add('active');
+      hint.style.display = 'none';
+    } else {
+      btn2.classList.remove('active');
+      hint.textContent = `Encore ${remaining} fonctionnalité${remaining > 1 ? 's' : ''} à voter`;
+    }
+  }
+
+  async function submitVotes() {
+    const btn = document.getElementById('submit-btn');
+    if (!btn.classList.contains('active')) return;
+
+    btn.textContent = 'Enregistrement…';
+    btn.classList.remove('active');
+
+    try {
+      const res = await fetch('/api/vote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ votes })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        document.getElementById('vote-screen').style.display = 'none';
+        showResults(data.results, data.voterCount);
+      } else {
+        alert(data.error || 'Une erreur est survenue.');
+        btn.textContent = 'Enregistrer mon vote';
+        btn.classList.add('active');
+      }
+    } catch {
+      alert('Erreur réseau. Veuillez réessayer.');
+      btn.textContent = 'Enregistrer mon vote';
+      btn.classList.add('active');
+    }
+  }
+
+  function showResults(results, voterCount) {
+    const screen = document.getElementById('success-screen');
+    screen.style.display = 'block';
+
+    const opts = [
+      { value: 'indispensable', label: '🎯 Indispensable' },
+      { value: 'utile',         label: '👍 Utile' },
+      { value: 'pas_urgent',    label: '🕐 Pas urgent' }
+    ];
+
+    const list = document.getElementById('results-list');
+    list.innerHTML = features.map(f => {
+      const r = results[f.id];
+      const total = r.total || 1;
+      return `
+        <div class="result-card">
+          <div class="result-feature-name">${f.emoji} ${f.name}</div>
+          ${opts.map(o => {
+            const count = r[o.value] || 0;
+            const pct = Math.round((count / total) * 100);
+            return `
+              <div class="bar-row">
+                <span class="bar-label">${o.label}</span>
+                <div class="bar-track">
+                  <div class="bar-fill ${o.value}" data-pct="${pct}" style="width:0%"></div>
+                </div>
+                <span class="bar-count">${count}</span>
+              </div>`;
+          }).join('')}
+        </div>`;
+    }).join('');
+
+    document.getElementById('voter-count').textContent =
+      `${voterCount} participant${voterCount > 1 ? 's' : ''} ont voté`;
+
+    // Animate bars
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.bar-fill').forEach(el => {
+        el.style.width = el.dataset.pct + '%';
+      });
+    });
+  }
+
+  document.getElementById('submit-btn').addEventListener('click', submitVotes);
+  init();
+</script>
+</body>
+</html>
